@@ -87,16 +87,12 @@ public class UserService {
     }
 
     public void uploadProfile(MultipartFile profile) throws IOException {
-        awsS3Service.upload(profile.getInputStream(), profile.getName());
+        awsS3Service.uploadFile(profile.getBytes(), servletRequestUtil.getAuthUserId());
     }
 
-    public String getProfileImageLink(MultipartFile profile) throws IOException {
+    public String getProfileImageLink() {
 
-        return null;
+        return awsS3Service.generatePresignedUrl(servletRequestUtil.getAuthUserId());
     }
 
-    public String getProfileImageKey(){
-        long userId = servletRequestUtil.getAuthUserId();
-        return "uid_"+userId;
-    }
 }

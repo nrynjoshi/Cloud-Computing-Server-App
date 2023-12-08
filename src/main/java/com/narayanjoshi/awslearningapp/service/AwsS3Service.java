@@ -1,8 +1,13 @@
 package com.narayanjoshi.awslearningapp.service;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
 import com.narayanjoshi.awslearningapp.exception.UploadException;
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
@@ -14,52 +19,67 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.waiters.S3Waiter;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class AwsS3Service {
 
-    private final Region awsRegion =  Region.US_EAST_1;
-    private final String BUCKET = "profile-img-bucket";
+    @Autowired
+    private AmazonS3 amazonS3;
 
-    private S3Client s3Client;
+    @Value("${s3.bucket.name}")
+    private String bucketName;
 
-    public void init(Region awsRegion) {
-        AWSCredentials credentials = new BasicAWSCredentials(
-                "<AWS accesskey>",
-                "<AWS secretkey>"
-        );
+    @Value("${temp.file.location}")
+    private String tempFileLocation;
 
-    }
+    public void uploadFile(byte[] bytes, long userId) {
 
-    public void upload(InputStream inputStream, String fileName) throws IOException {
+        String fileName = prepareFileName(userId);
 
-        AWSCredentials credentials = new BasicAWSCredentials(
-                "<AWS accesskey>",
-                "<AWS secretkey>"
-        );
+        String tempFileSaved = tempFileLocation + UUID.randomUUID().toString();
 
-        PutObjectRequest request = PutObjectRequest.builder()
-                .bucket(BUCKET)
-                .key(fileName)
-                .build();
+        Path filepath = Paths.get(tempFileSaved, fileName);
 
 
-        s3Client.putObject(request, RequestBody.fromInputStream(inputStream, inputStream.available()));
+        try {
 
-        S3Waiter s3Waiter= S3Waiter.create();
-        HeadObjectRequest waitRequest= HeadObjectRequest.builder()
-                .bucket(BUCKET)
-                .key(fileName)
-                .build();
-        WaiterResponse<HeadObjectResponse> headObjectResponseWaiterResponse = s3Waiter.waitUntilObjectExists(waitRequest);
-        boolean present = headObjectResponseWaiterResponse.matched().response().isPresent();
-        if(!present){
-            throw new UploadException("File upload error.");
+            File file = filepath.toFile();
+            FileUtils.writeByteArrayToFile(file, bytes);
+
+            amazonS3.putObject(bucketName, fileName, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            FileUtils.deleteQuietly(filepath.toFile());
         }
+
     }
+
+    private static String prepareFileName(long userId) {
+        String fileName = userId + "profile-img.jpg";
+        return fileName;
+    }
+
+    public String generatePresignedUrl(long userId) {
+
+        String fileName = prepareFileName(userId);
+
+        boolean doesObjectExist = amazonS3.doesObjectExist(bucketName, fileName);
+
+        if(!doesObjectExist){
+            return null;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DATE, 1); // Generated URL will be valid for 24 hours
+        return amazonS3.generatePresignedUrl(bucketName, fileName, calendar.getTime(), HttpMethod.GET).toString();
+    }
+
 }

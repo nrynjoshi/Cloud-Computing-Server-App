@@ -59,16 +59,16 @@ public class UserAccessEndpoint {
     @PostMapping(value = "/upload/profile")
     public ResponseDTO uploadProfile(@RequestHeader("token") String token, @RequestParam("file") MultipartFile file) throws IOException {
         tokenConfig.validateUserAccessToken(token);
-//        userService.uploadProfile(file);
+        userService.uploadProfile(file);
         ResponseDTO responseDTO = new ResponseDTO();
         responseDTO.setMessage("Upload successfully");
         return responseDTO;
     }
 
-    @GetMapping(path = "/view/profile-image/{id}")
-    public ResponseDTO downloadFile(@PathVariable String id) {
+    @GetMapping(path = "/view/profile-image")
+    public ResponseDTO profileViewLink() {
         ResponseDTO responseDTO = new ResponseDTO();
-        responseDTO.setItem("link", userService.getProfileImageKey());
+        responseDTO.setItem("link", userService.getProfileImageLink());
         return responseDTO;
     }
 }
