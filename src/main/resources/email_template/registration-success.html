@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        body{
+            max-width: 100vh !important;
+            margin-top: 5vh;
+            margin-left: 5vh;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="row">
+        <div class="container">
+            <div class="alert alert-info bold" role="alert" style="text-align: center;font-weight: bold;">
+                Registration has been successfully.
+            </div>
+            <p>
+                Hello ${name},<br>
+                Your registration has been successful. The final step before login to the system is confirming your email by using below button.
+
+            </p>
+            <div class="d-grid gap-2">
+                <a class="btn btn-success align-center" href="${confirmation_link}">Confirm Email</a>
+            </div>
+            You can complete the confirmation and continue accessing the system from now.
+            <br>
+            Thank you and enjoy this application.
+
+        </div>
+
+    </div>
+    <div class="footer" style="color: rgb(128,128,128)">
+        <hr>
+        Best Regrade<br>
+        Mr. Narayan Joshi<br>
+        Leeds Beckett University - 2023 Student<br>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+</body>
+</html>
