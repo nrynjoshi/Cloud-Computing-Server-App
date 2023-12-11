@@ -20,12 +20,12 @@ public class TokenConfig {
     @Autowired private PasswordEncoder encoder;
     @Autowired private UserRepo userRepo;
 
-    public static final String AUTH_TOKEN_HEADER_PREFIX = "API_AUTH";
+    public static final String AUTH_TOKEN_HEADER_PREFIX = "API-AUTH";
 
 
 
     public void  validateUserAccessToken(String tokenVal){
-        String[] tokenSplit = StringUtils.split(tokenVal, "_", 2);
+        String[] tokenSplit = StringUtils.split(tokenVal, "-", 2);
         String id = tokenSplit[0];
         String token = tokenSplit[1];
         Optional<User> byId = userRepo.findById(id);
@@ -41,7 +41,7 @@ public class TokenConfig {
 
     public String createUserAccessToken(User byEmail){
         String tokenRaw = prepareHashTokenCombination(byEmail);
-        return byEmail.getId()+"_"+encoder.encode(tokenRaw);
+        return byEmail.getId()+"-"+encoder.encode(tokenRaw);
     }
 
     public String prepareHashTokenCombination(User byEmail){

@@ -14,7 +14,7 @@ public class ServletRequestUtil {
     HttpServletRequest request;
     public long getAuthUserId(){
         String token = request.getHeader("token");
-        String[] tokenSplit = token.split("_", 2);
+        String[] tokenSplit = token.split("-", 2);
         return Long.valueOf(tokenSplit[0]);
     }
 
